@@ -1,0 +1,95 @@
+--- parboiled-scala/pom.xml	2013-08-26 12:54:13.000000000 +0200
++++ parboiled-scala/pom.xml-gil	2014-03-20 07:40:12.564265870 +0100
+@@ -54,4 +54,91 @@
+             <scope>test</scope>
+         </dependency>
+     </dependencies>
++    <build>
++      <plugins>
++             <plugin>
++               <groupId>org.apache.maven.plugins</groupId>
++               <artifactId>maven-antrun-plugin</artifactId>
++               <version>1.7</version>
++               <executions>
++                <execution>
++                   <id>scala-compile</id>
++                   <phase>compile</phase>
++                   <configuration>
++                     <tasks>
++                       <property name="build.compiler" value="extJavac"/>
++                       <taskdef resource="scala/tools/ant/antlib.xml" classpathref="maven.compile.classpath"/>
++                       <mkdir dir="${project.build.outputDirectory}"/>
++                       <scalac srcdir="src/main" destdir="${project.build.outputDirectory}" classpathref="maven.compile.classpath">
++                         <include name="scala/**/*.scala"/>
++                       </scalac>
++                     </tasks>
++                   </configuration>
++                   <goals>
++                     <goal>run</goal>
++                   </goals>
++                </execution>
++                <!--TODO unavailable test deps-->
++                <!--execution>
++                        <id>scala-test-compile</id>
++                        <phase>test-compile</phase>
++                        <configuration>
++                            <tasks>
++                                <property name="build.compiler" value="extJavac"/>
++                                <taskdef resource="scala/tools/ant/antlib.xml" classpathref="maven.compile.classpath"/>
++                                <mkdir dir="${project.build.testOutputDirectory}"/>
++                                <scalac srcdir="src/test" destdir="${project.build.testOutputDirectory}" classpathref="maven.test.classpath">
++                                    <include name="scala/**/*.scala"/>
++                                </scalac>
++                            </tasks>
++                        </configuration>
++                         <goals>
++                            <goal>run</goal>
++                         </goals>
++                </execution-->
++               </executions>
++               <dependencies>
++                <dependency>
++                   <groupId>org.scala-lang</groupId>
++                   <artifactId>scala-compiler</artifactId>
++                   <version>2.10.2</version>
++                </dependency>
++               </dependencies>
++             </plugin>
++             <plugin>
++               <groupId>org.apache.felix</groupId>
++               <artifactId>maven-bundle-plugin</artifactId>
++               <version>2.3.7</version>
++               <extensions>true</extensions>
++               <configuration>
++                <instructions>
++                   <Bundle-SymbolicName>org.parboiled.scala</Bundle-SymbolicName>
++                   <Bundle-Name>org.parboiled.scala</Bundle-Name>
++                   <Bundle-Version>${project.version}</Bundle-Version>
++                   <Private-Package>org.parboiled.scala.*</Private-Package>
++                </instructions>
++               </configuration>
++               <executions>
++                <execution>
++                   <id>bundle-manifest</id>
++                   <phase>process-classes</phase>
++                   <goals>
++                     <goal>manifest</goal>
++                   </goals>
++                </execution>
++               </executions>
++             </plugin>
++             <plugin>
++               <groupId>org.apache.maven.plugins</groupId>
++               <artifactId>maven-jar-plugin</artifactId>
++               <version>2.4</version>
++               <configuration>
++                <archive>
++                   <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
++                </archive>
++               </configuration>
++             </plugin>
++      </plugins>
++    </build>
++
+ </project>
+\ Manca newline alla fine del file

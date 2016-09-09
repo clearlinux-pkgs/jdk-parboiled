@@ -1,0 +1,80 @@
+find . -name "*.class" -delete
+find . -name "*.jar" -delete
+
+cp -p  %{SOURCE1} parboiled-core/pom.xml
+cp -p  %{SOURCE2} parboiled-java/pom.xml
+cp -p  %{SOURCE4} parboiled-scala/pom.xml
+
+for m in core java; do
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_inject   "pom:project" "
+
+<build>
+  <plugins>
+
+  </plugins>
+</build>" parboiled-${m}
+
+python3 /usr/share/java-utils/pom_editor.py pom_add_plugin     org.apache.maven.plugins:maven-jar-plugin parboiled-${m} "
+
+<configuration>
+  <archive>
+    <manifestFile>\${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+  </archive>
+</configuration>"
+done
+
+python3 /usr/share/java-utils/pom_editor.py pom_add_plugin     org.apache.felix:maven-bundle-plugin parboiled-core "
+
+<extensions>true</extensions>
+<configuration>
+  <instructions>
+    <Bundle-SymbolicName>org.parboiled.core</Bundle-SymbolicName>
+    <Bundle-Name>org.parboiled.core</Bundle-Name>
+    <Bundle-Version>\${project.version}</Bundle-Version>
+    <Private-Package>org.parboiled.core.*</Private-Package>
+  </instructions>
+</configuration>
+<executions>
+  <execution>
+    <id>bundle-manifest</id>
+    <phase>process-classes</phase>
+    <goals>
+      <goal>manifest</goal>
+    </goals>
+  </execution>
+</executions>"
+
+python3 /usr/share/java-utils/pom_editor.py pom_add_plugin     org.apache.felix:maven-bundle-plugin parboiled-java "
+
+<extensions>true</extensions>
+<configuration>
+  <instructions>
+    <Bundle-SymbolicName>org.parboiled.java</Bundle-SymbolicName>
+    <Bundle-Name>org.parboiled.java</Bundle-Name>
+    <Bundle-Version>\${project.version}</Bundle-Version>
+    <Fragment-Host>org.parboiled.core</Fragment-Host>
+    <Private-Package>org.parboiled.java.*</Private-Package>
+  </instructions>
+</configuration>
+<executions>
+  <execution>
+    <id>bundle-manifest</id>
+    <phase>process-classes</phase>
+    <goals>
+      <goal>manifest</goal>
+    </goals>
+  </execution>
+</executions>"
+
+%patch0 -p0
+%patch1 -p1
+
+cp -p %{SOURCE3} pom.xml
+sed -i "s|@VERSION@|1.1.6|" pom.xml
+
+python3 /usr/share/java-utils/mvn_file.py :parboiled-core parboiled/core
+python3 /usr/share/java-utils/mvn_file.py :parboiled-java parboiled/java
+python3 /usr/share/java-utils/mvn_package.py :parboiled-project __noinstall
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_inject   "pom:modules" "<module>parboiled-scala</module>"
+python3 /usr/share/java-utils/mvn_file.py :parboiled-scala_2.10 parboiled/scala
+python3 /usr/share/java-utils/mvn_package.py :parboiled-scala_2.10 scala
