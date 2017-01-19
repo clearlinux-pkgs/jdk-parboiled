@@ -94,6 +94,7 @@ BuildRequires : jdk-scala-xml_2.11
 BuildRequires : jdk-sisu
 BuildRequires : jdk-slf4j
 BuildRequires : jdk-snappy
+BuildRequires : jdk-snappy-java
 BuildRequires : jdk-surefire
 BuildRequires : jdk-velocity
 BuildRequires : jdk-wagon
